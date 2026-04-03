@@ -12,6 +12,18 @@ let launching = null;
 let activePages = 0;
 const MAX_PAGES = 3;
 
+const fs = require("fs");
+const path = require("path");
+
+function findChrome() {
+  const base = "/opt/render/.cache/puppeteer/chrome";
+  const dirs = fs.readdirSync(base);
+
+  const latest = dirs[dirs.length - 1];
+
+  return path.join(base, latest, "chrome-linux64", "chrome");
+}
+
 app.use((req, res, next) => {
   res.setTimeout(120000); // 2 minúty
   next();
@@ -28,6 +40,7 @@ async function getBrowser() {
     console.log("🚀 Spúšťam Puppeteer...");
     launching = puppeteer.launch({
       headless: "new",
+      executablePath: findChrome(),
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
   }
