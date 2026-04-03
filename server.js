@@ -29,10 +29,13 @@ async function getBrowser() {
 
   if (!launching) {
     console.log("🚀 Spúšťam Puppeteer...");
+
     launching = puppeteer.launch({
       headless: "new",
+      executablePath: "/opt/render/.cache/puppeteer/chrome/linux-124.0.6367.78/chrome-linux64/chrome",
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
+    console.log("Chrome path:", puppeteer.executablePath());
   }
 
   browser = await launching;
