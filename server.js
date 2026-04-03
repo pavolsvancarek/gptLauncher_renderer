@@ -12,7 +12,7 @@ let activePages = 0;
 const MAX_PAGES = 3;
 
 app.use((req, res, next) => {
-  res.setTimeout(60000); // 60 sekúnd
+  res.setTimeout(120000); // 2 minúty
   next();
 });
 
