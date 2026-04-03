@@ -1,6 +1,8 @@
 const express = require("express");
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
 const fs = require("fs");
+console.log("Chromium exists:", require("fs").existsSync("/usr/bin/chromium"));
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,38 +25,32 @@ app.get("/", (req, res) => {
 });
 
 
-// 🔥 NAJDI CHROME
-function findChrome() {
-  const base = "./.cache/puppeteer/chrome";
-
-  if (!fs.existsSync(base)) {
-    throw new Error("❌ Chrome folder neexistuje");
-  }
-
-  const versions = fs.readdirSync(base);
-  const latest = versions[0];
-
-  const fullPath = `${base}/${latest}/chrome-linux64/chrome`;
-
-  console.log("✅ Chrome path:", fullPath);
-
-  return fullPath;
-}
-
 
 // 🔥 BROWSER INIT
 async function getBrowser() {
   if (browser) return browser;
-
+  const paths = [
+    "/usr/bin/chromium",
+    "/usr/bin/chromium-browser"
+  ];
+  
+  const executablePath = paths.find(p => fs.existsSync(p));
+  
+  if (!executablePath) {
+    throw new Error("Chromium not found");
+  }
+  
   if (!launching) {
     console.log("🚀 Spúšťam Puppeteer...");
-
-    const executablePath = findChrome();
-
     launching = puppeteer.launch({
       headless: "new",
-      executablePath: "/opt/render/.cache/puppeteer/chrome/linux-124.0.6367.78/chrome-linux64/chrome",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      executablePath,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu"
+      ]
     });
   }
 
