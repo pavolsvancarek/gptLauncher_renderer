@@ -52,7 +52,7 @@ async function getBrowser() {
 
     launching = puppeteer.launch({
       headless: "new",
-      executablePath,
+      executablePath: "/opt/render/.cache/puppeteer/chrome/linux-124.0.6367.78/chrome-linux64/chrome",
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
   }
