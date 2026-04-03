@@ -25,19 +25,20 @@ app.get("/", (req, res) => {
 
 // 🔥 NAJDI CHROME
 function findChrome() {
-  const paths = [
-    process.env.PUPPETEER_EXECUTABLE_PATH,
-    "/opt/render/.cache/puppeteer/chrome/linux-124.0.6367.78/chrome-linux64/chrome"
-  ];
+  const base = "./.cache/puppeteer/chrome";
 
-  for (const p of paths) {
-    if (p && fs.existsSync(p)) {
-      console.log("✅ Chrome nájdený:", p);
-      return p;
-    }
+  if (!fs.existsSync(base)) {
+    throw new Error("❌ Chrome folder neexistuje");
   }
 
-  throw new Error("❌ Chrome sa nenašiel");
+  const versions = fs.readdirSync(base);
+  const latest = versions[0];
+
+  const fullPath = `${base}/${latest}/chrome-linux64/chrome`;
+
+  console.log("✅ Chrome path:", fullPath);
+
+  return fullPath;
 }
 
 
