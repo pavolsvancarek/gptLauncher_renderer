@@ -1,22 +1,20 @@
 const express = require("express");
 const puppeteer = require("puppeteer");
+const fs = require("fs");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const cache = new Map();
 
-
 let browser = null;
 let launching = null;
 let activePages = 0;
 const MAX_PAGES = 3;
 
-const fs = require("fs");
-const path = require("path");
-
+// timeout
 app.use((req, res, next) => {
-  res.setTimeout(120000); // 2 minúty
+  res.setTimeout(120000);
   next();
 });
 
@@ -24,35 +22,63 @@ app.get("/", (req, res) => {
   res.send("OK");
 });
 
+
+// 🔥 NAJDI CHROME
+function findChrome() {
+  const paths = [
+    process.env.PUPPETEER_EXECUTABLE_PATH,
+    "/opt/render/.cache/puppeteer/chrome/linux-124.0.6367.78/chrome-linux64/chrome"
+  ];
+
+  for (const p of paths) {
+    if (p && fs.existsSync(p)) {
+      console.log("✅ Chrome nájdený:", p);
+      return p;
+    }
+  }
+
+  throw new Error("❌ Chrome sa nenašiel");
+}
+
+
+// 🔥 BROWSER INIT
 async function getBrowser() {
   if (browser) return browser;
 
   if (!launching) {
     console.log("🚀 Spúšťam Puppeteer...");
 
+    const executablePath = findChrome();
+
     launching = puppeteer.launch({
       headless: "new",
-      executablePath: "/opt/render/.cache/puppeteer/chrome/linux-124.0.6367.78/chrome-linux64/chrome",
+      executablePath,
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
-    console.log("Chrome path:", puppeteer.executablePath());
   }
 
   browser = await launching;
+
+  browser.on("disconnected", () => {
+    console.log("💥 Browser spadol, resetujem...");
+    browser = null;
+    launching = null;
+  });
+
   console.log("✅ Puppeteer pripravený");
 
   return browser;
 }
 
 
-// 🔥 Funkcia s retry
+// 🔥 SCRAPER
 async function getFollowers(username) {
   if (activePages >= MAX_PAGES) {
     throw new Error("Server busy");
   }
 
   activePages++;
-  
+
   const browserInstance = await getBrowser();
   const page = await browserInstance.newPage();
 
@@ -69,7 +95,6 @@ async function getFollowers(username) {
       "accept-language": "en-US,en;q=0.9"
     });
 
-    // 👇 pokus 3x
     for (let i = 0; i < 3; i++) {
       try {
         console.log(`🌐 Pokus ${i + 1}`);
@@ -80,11 +105,11 @@ async function getFollowers(username) {
         });
 
         await page.waitForSelector("span[title]", { timeout: 8000 });
+
         const followers = await page.evaluate(() => {
           const el = document.querySelector("span[title]");
           if (el) return el.getAttribute("title");
 
-          // fallback
           const spans = Array.from(document.querySelectorAll("span"));
           for (const s of spans) {
             if (s.innerText && /\d/.test(s.innerText)) {
@@ -95,9 +120,7 @@ async function getFollowers(username) {
           return null;
         });
 
-        if (followers) {
-          return followers;
-        }
+        if (followers) return followers;
 
       } catch (e) {
         console.log("⚠️ retry...");
@@ -120,7 +143,6 @@ app.get("/ig/:username", async (req, res) => {
 
   console.log(`\n📥 Request: ${username}`);
 
-  // ✅ CACHE
   const cached = cache.get(username);
   if (cached && Date.now() - cached.time < 60000) {
     console.log("⚡ CACHE HIT");
@@ -143,7 +165,6 @@ app.get("/ig/:username", async (req, res) => {
       followers: parseInt(clean)
     };
 
-    // ✅ uloženie do cache
     cache.set(username, {
       data: result,
       time: Date.now()
