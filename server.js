@@ -4,12 +4,16 @@ const puppeteer = require("puppeteer");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const CHROME_PATH = "/opt/render/.cache/puppeteer/chrome/linux-124.0.6367.78/chrome-linux64/chrome";
+
 app.get("/", async (req, res) => {
   try {
     console.log("🚀 Spúšťam Puppeteer...");
+    console.log("Používam Chrome:", CHROME_PATH);
 
     const browser = await puppeteer.launch({
       headless: "new",
+      executablePath: CHROME_PATH,
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
 
