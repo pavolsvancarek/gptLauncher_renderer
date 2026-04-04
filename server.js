@@ -6,21 +6,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 function getChromePath() {
-  const base = ".puppeteer/chrome";
-
-  if (!fs.existsSync(base)) {
-    throw new Error("❌ Chrome folder neexistuje v projekte");
-  }
+  const fs = require("fs");
+  const base = "/opt/render/project/src/.puppeteer/chrome";
 
   const versions = fs.readdirSync(base);
   const latest = versions[0];
 
-  const fullPath = `${base}/${latest}/chrome-linux64/chrome`;
-
-  console.log("✅ Chrome path:", fullPath);
-
-  
-  return fullPath;
+  return `${base}/${latest}/chrome-linux64/chrome`;
 }
 
 app.get("/", async (req, res) => {
