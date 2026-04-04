@@ -19,6 +19,7 @@ function getChromePath() {
 
   console.log("✅ Chrome path:", fullPath);
 
+  
   return fullPath;
 }
 
