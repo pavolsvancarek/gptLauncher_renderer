@@ -1,19 +1,32 @@
 const express = require("express");
 const puppeteer = require("puppeteer");
+const fs = require("fs");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const CHROME_PATH = "/opt/render/.cache/puppeteer/chrome/linux-124.0.6367.78/chrome-linux64/chrome";
+function getChromePath() {
+  const base = ".puppeteer/chrome";
+
+  if (!fs.existsSync(base)) {
+    throw new Error("❌ Chrome folder neexistuje v projekte");
+  }
+
+  const versions = fs.readdirSync(base);
+  const latest = versions[0];
+
+  const fullPath = `${base}/${latest}/chrome-linux64/chrome`;
+
+  console.log("✅ Chrome path:", fullPath);
+
+  return fullPath;
+}
 
 app.get("/", async (req, res) => {
   try {
-    console.log("🚀 Spúšťam Puppeteer...");
-    console.log("Používam Chrome:", CHROME_PATH);
-
     const browser = await puppeteer.launch({
       headless: "new",
-      executablePath: CHROME_PATH,
+      executablePath: getChromePath(),
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
 
@@ -27,16 +40,11 @@ app.get("/", async (req, res) => {
 
     await browser.close();
 
-    res.json({
-      success: true,
-      title
-    });
+    res.json({ success: true, title });
 
   } catch (e) {
     console.log("💥 ERROR:", e.message);
-    res.status(500).json({
-      error: e.message
-    });
+    res.status(500).json({ error: e.message });
   }
 });
 
