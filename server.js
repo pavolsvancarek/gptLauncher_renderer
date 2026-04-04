@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 
 app.get("/", async (req, res) => {
   try {
-    console.log("🚀 Spúšťam browser...");
+    console.log("🚀 Spúšťam Puppeteer...");
 
     const browser = await puppeteer.launch({
       headless: "new",
@@ -30,7 +30,9 @@ app.get("/", async (req, res) => {
 
   } catch (e) {
     console.log("💥 ERROR:", e.message);
-    res.status(500).json({ error: e.message });
+    res.status(500).json({
+      error: e.message
+    });
   }
 });
 
