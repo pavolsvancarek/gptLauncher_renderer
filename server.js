@@ -98,13 +98,42 @@ async function getFollowers(username) {
           waitUntil: "networkidle2",
           timeout: 30000
         });
-
+        const html = await page.content();
+        
+        if (html.includes("login")) {
+          console.log("🔒 IG chce login");
+        }
+        
+        if (html.includes("Please wait")) {
+          console.log("⏳ IG rate limit / block");
+        }
+        
+        if (html.includes("challenge")) {
+          console.log("⚠️ IG challenge page");
+        }
+        
+        console.log("📄 HTML length:", html.length);
+        
+        // uloz si to
+        fs.writeFileSync(`debug-${username}.html`, html);
         await page.waitForSelector("span[title]", { timeout: 8000 });
 
         const followers = await page.evaluate(() => {
           const el = document.querySelector("span[title]");
           if (el) return el.getAttribute("title");
-
+          
+          const debug = await page.evaluate(() => {
+            const titles = Array.from(document.querySelectorAll("span[title]"))
+              .map(el => el.getAttribute("title"));
+          
+            return {
+              titleSpans: titles.slice(0, 5),
+              bodyText: document.body.innerText.slice(0, 500)
+            };
+          });
+          
+          console.log("🔍 DEBUG:", debug);
+          
           const spans = Array.from(document.querySelectorAll("span"));
           for (const s of spans) {
             if (s.innerText && /\d/.test(s.innerText)) {
