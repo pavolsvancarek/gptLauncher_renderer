@@ -158,8 +158,8 @@ async function getFollowers(username) {
     );
 
     await page.goto(`https://www.instagram.com/${username}/`, {
-      waitUntil: "networkidle2",
-      timeout: 30000
+      waitUntil: "domcontentloaded",
+      timeout: 60000
     });
 
     const title = await page.title();
