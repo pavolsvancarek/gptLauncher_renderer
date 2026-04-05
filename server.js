@@ -117,32 +117,35 @@ async function getFollowers(username) {
         // uloz si to
         fs.writeFileSync(`debug-${username}.html`, html);
         await page.waitForSelector("span[title]", { timeout: 8000 });
-
+        
+        const title = await page.title();
+        console.log("📌 PAGE TITLE:", title);
+        
         const followers = await page.evaluate(() => {
-          const el = document.querySelector("span[title]");
+          const el = document.querySelector("header span[title]");
           if (el) return el.getAttribute("title");
-          
-          const debug = await page.evaluate(() => {
-            const titles = Array.from(document.querySelectorAll("span[title]"))
-              .map(el => el.getAttribute("title"));
-          
-            return {
-              titleSpans: titles.slice(0, 5),
-              bodyText: document.body.innerText.slice(0, 500)
-            };
-          });
-          
-          console.log("🔍 DEBUG:", debug);
-          
+        
           const spans = Array.from(document.querySelectorAll("span"));
           for (const s of spans) {
             if (s.innerText && /\d/.test(s.innerText)) {
               return s.innerText;
             }
           }
-
+        
           return null;
         });
+
+        const debug = await page.evaluate(() => {
+          const titles = Array.from(document.querySelectorAll("span[title]"))
+            .map(el => el.getAttribute("title"));
+        
+          return {
+            titleSpans: titles.slice(0, 5),
+            bodyText: document.body.innerText.slice(0, 500)
+          };
+        });
+        
+        console.log("🔍 DEBUG:", debug);
 
         if (followers) return followers;
 
