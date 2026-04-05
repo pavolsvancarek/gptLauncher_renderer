@@ -16,56 +16,7 @@ let activePages = 0;
 const MAX_PAGES = 3;
 
 // 🔥 cookies
-const cookies = [
-  {
-    name: "datr",
-    value: "IzEfaen3NHcErrXiGQbEP_Ya",
-    domain: ".instagram.com",
-    path: "/",
-    httpOnly: true,
-    secure: true,
-    sameSite: "None"
-  },
-  {
-    name: "ig_did",
-    value: "B9A79067-2CDD-4446-AE1E-116F82D3DAE0",
-    domain: ".instagram.com",
-    path: "/",
-    httpOnly: true,
-    secure: true
-  },
-  {
-    name: "mid",
-    value: "aR8xIwALAAH8OL0kWU6uuNdEtCNc",
-    domain: ".instagram.com",
-    path: "/",
-    httpOnly: true,
-    secure: true,
-    sameSite: "None"
-  },
-  {
-    name: "ds_user_id",
-    value: "76395667568",
-    domain: ".instagram.com",
-    path: "/",
-    secure: true
-  },
-  {
-    name: "csrftoken",
-    value: "Qu6a3bAdJ2tIjfjWzfLTXMwe6wRclfcU",
-    domain: ".instagram.com",
-    path: "/",
-    secure: true
-  },
-  {
-    name: "sessionid",
-    value: "76395667568%3Armknwqb6mgX7Hw%3A23%3AAYh2_Ivk_1DSrtugAGr9TtnV52sMHgF_GmfKDGXj-2Mf",
-    domain: ".instagram.com",
-    path: "/",
-    httpOnly: true,
-    secure: true
-  }
-];
+const cookies = JSON.parse(process.env.IG_COOKIES);
 
 app.use((req, res, next) => {
   res.setTimeout(120000);
