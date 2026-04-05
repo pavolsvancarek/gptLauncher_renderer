@@ -134,7 +134,7 @@ async function getFollowers(username) {
       "accept-language": "en-US,en;q=0.9"
     });
 
-    await page.waitForTimeout(2000 + Math.random() * 2000);
+    await new Promise(r => setTimeout(r, 2000 + Math.random() * 2000));
 
     await page.goto("https://www.instagram.com/", {
       waitUntil: "domcontentloaded"
